@@ -1,5 +1,10 @@
 import {BrowserWindow, BrowserView, IpcMain, IpcRenderer} from 'electron';
 
+type DefaultInterface = {
+	data: unknown;
+	return: unknown;
+}
+
 export interface MainProcessIpc extends IpcMain {
 	/**
 	Send a message to the given window.
@@ -25,11 +30,11 @@ export interface MainProcessIpc extends IpcMain {
 	})();
 	```
 	*/
-	callRenderer<DataType, ReturnType = unknown>(
+	callRenderer<Interface = DefaultInterface>(
 		browserWindow: BrowserWindow,
 		channel: string,
-		data?: DataType
-	): Promise<ReturnType>;
+		data?: Interface['data']
+	): Promise<Interface['return']>;
 
 	/**
 	Send a message to the focused window, as determined by `electron.BrowserWindow.getFocusedWindow`.
@@ -51,10 +56,10 @@ export interface MainProcessIpc extends IpcMain {
 	})();
 	```
 	*/
-	callFocusedRenderer<DataType, ReturnType = unknown>(
+	callFocusedRenderer<Interface = DefaultInterface>(
 		channel: string,
-		data?: DataType
-	): Promise<ReturnType>;
+		data?: Interface['data']
+	): Promise<Interface['return']>;
 
 	/**
 	This method listens for a message from `ipcRenderer.callMain` defined in a renderer process and replies back.
@@ -73,12 +78,12 @@ export interface MainProcessIpc extends IpcMain {
 	});
 	```
 	*/
-	answerRenderer<DataType, ReturnType = unknown>(
+	answerRenderer<Interface = DefaultInterface>(
 		channel: string,
 		callback: (
-			data: DataType,
+			data: Interface['data'],
 			browserWindow: BrowserView
-		) => ReturnType | PromiseLike<ReturnType>
+		) => Interface['return'] | PromiseLike<Interface['return']>
 	): () => void;
 
 	/**
@@ -111,7 +116,7 @@ export interface RendererProcessIpc extends IpcRenderer {
 	})();
 	```
 	*/
-	callMain<DataType, ReturnType = unknown>(channel: string, data?: DataType): Promise<ReturnType>;
+	callMain<Interface = DefaultInterface>(channel: string, data?: Interface['data']): Promise<Interface['return']>;
 
 	/**
 	This method listens for a message from `ipcMain.callRenderer` defined in the main process and replies back.
@@ -130,9 +135,9 @@ export interface RendererProcessIpc extends IpcRenderer {
 	});
 	```
 	*/
-	answerMain<DataType, ReturnType = unknown>(
+	answerMain<Interface = DefaultInterface>(
 		channel: string,
-		callback: (data: DataType) => ReturnType | PromiseLike<ReturnType>
+		callback: (data: Interface['data']) => Interface['return'] | PromiseLike<Interface['return']>
 	): () => void;
 }
 
